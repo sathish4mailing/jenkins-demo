@@ -1,4 +1,4 @@
-JavaNCSS - Casestudy6
+JavaNCSS - Casestudy6 - Rerun
 
    
 A Source Measurement Suite for Java
