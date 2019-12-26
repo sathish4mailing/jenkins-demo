@@ -1,4 +1,4 @@
-JavaNCSS
+JavaNCSS - Casestudy6
 
    
 A Source Measurement Suite for Java
