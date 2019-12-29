@@ -27,7 +27,7 @@ pipeline {
             steps {
                 script {
                     echo "deployment"
-                    sh 'cp MavenProject/multi3/target/*.war /opt/tomcat/latest/webapps/'
+                    sh 'cp MavenProject/multi3/target/*.war /opt/tomcat/apache-tomcat-9.0.29/webapps/'
                 }
             }
         }
