@@ -5,7 +5,6 @@ pipeline {
             steps {
                 echo "checking out the repo"
                 git 'https://github.com/sathish4mailing/jenkins-demo.git'
-            
             }
         }
         stage('build'){
