@@ -1,0 +1,73 @@
+pipeline {
+    agent any 
+    stages {
+        stage('Clone') {
+            steps {
+                echo "checking out the repo"
+                git 'https://github.com/sathish4mailing/jenkins-demo.git'
+            
+            }
+        }
+        stage('build'){
+            steps {
+                echo "building the project"
+                sh "cd MavenProject ; mvn clean install ; pwd"
+            }
+        }
+        stage('Archieve Artifacts'){
+            steps {
+                echo "archiving the artifacts"
+                archiveArtifacts 'MavenProject/multi3/target/*.war'
+            }
+        }
+        stage("Metrics"){
+            steps{
+                parallel ( "Cobertura Report":   
+                    {
+                        node('window'){
+                            git 'https://github.com/sathish4mailing/jenkins-demo.git'
+                            sh "cd MavenProject ; mvn test cobertura:cobertura -Pmetrics ; pwd"
+                            cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'MavenProject/multi1/target/site/cobertura/coverage.xml', conditionalCoverageTargets: '70, 0, 0', failUnhealthy: false, failUnstable: false, lineCoverageTargets: '80, 0, 0', maxNumberOfBuilds: 0, methodCoverageTargets: '80, 0, 0', onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
+                        }
+                    },
+                    "FindBugs Report" : {
+                        node('window'){
+                            sh "mkdir javancss1 ; cd javancss1 ;pwd"
+                            git 'https://github.com/sathish4mailing/jenkins-demo.git'
+                            sh "cd MavenProject ; mvn findbugs:findbugs ; pwd"
+                            findbugs canComputeNew: false, defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', isRankActivated: true, pattern: 'MavenProject/multi1/target/findbugsXml.xml', unHealthy: ''
+                            deleteDir()
+                        }
+                    }
+		        )
+            }
+        }
+        stage('Deployment') {
+            // Deployment
+            steps {
+                script {
+                    echo "deployment"
+                    sh 'cp MavenProject/multi3/target/*.war /opt/tomcat/apache-tomcat-9.0.29/webapps/'
+                }
+            }
+        }
+        stage('Email') {
+            // Email
+            steps {
+                emailext body: 'Successfully completed pipeline project with archiving the artifacts', subject: 'Pipeline was successfull', to: '$email_ids'
+            }
+        }
+        stage('publish html report') {
+            steps{
+                echo "publishing the html report"
+                publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: ''])
+            }
+        }
+        stage('clean up') {
+            steps {
+                echo "cleaning up the workspace"
+                cleanWs()
+            }
+        }
+    }
+}
